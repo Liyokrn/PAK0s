@@ -3,6 +3,7 @@ import './App.css'
 import logo from '/logo.png'
 
 function App() {
+  alert(`${import.meta.env.VITE_API_URL}/games`)
   const handleSubmit = (e) => {
     e.preventDefault()
     const name = e.target.name.value
