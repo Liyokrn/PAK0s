@@ -1,0 +1,46 @@
+name: Deploy to Kubernetes
+
+on:
+  push:
+    branches:
+      - main  # Cambia esto a la rama que quieras monitorear
+
+env:
+  DOCKER_IMAGE: liyo13/build-push-actions
+  KUBE_NAMESPACE: tu_namespace
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_HUB_USER }}
+        password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+    - name: Build Docker image
+      run: docker build -t $DOCKER_IMAGE:${{ github.sha }} .
+
+    - name: Push Docker image
+      run: docker push $DOCKER_IMAGE:${{ github.sha }}
+
+    - name: Install kubectl
+      run: |
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+
+    - name: Configure kubeconfig
+      run: |
+        echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig.yaml
+        export KUBECONFIG=kubeconfig.yaml
+
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl config set-context --current --namespace=$KUBE_NAMESPACE
+        kubectl set image deployment/nombre_de_tu_deployment nombre_del_contenedor=$DOCKER_IMAGE:${{ github.sha }}
