@@ -7,7 +7,7 @@ on:
 
 env:
   DOCKER_IMAGE: liyo13/build-push-actions
-  KUBE_NAMESPACE: tu_namespace
+  KUBE_NAMESPACE: default
 
 jobs:
   build-and-deploy:
