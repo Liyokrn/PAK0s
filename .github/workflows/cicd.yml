@@ -16,7 +16,11 @@ jobs:
     - name: Log in to Docker Hub #cambiar despues
       uses: docker/login-action@v2
       with:
+<<<<<<< HEAD
         username: ${{ secrets.DOCKER_HUB_USER }}
+=======
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+>>>>>>> 78a7426871e4fc071cc53d47ba2469a5a01c9146
         password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
     - name: Build and push Docker image
@@ -34,4 +38,8 @@ jobs:
 
     - name: Deploy to Kubernetes
       run: |
+<<<<<<< HEAD
         kubectl apply -f deployment.yaml
+=======
+        kubectl apply -f deployment.yaml
+>>>>>>> 78a7426871e4fc071cc53d47ba2469a5a01c9146
