@@ -16,17 +16,13 @@ jobs:
     - name: Log in to Docker Hub #cambiar despues
       uses: docker/login-action@v2
       with:
-<<<<<<< HEAD
         username: ${{ secrets.DOCKER_HUB_USER }}
-=======
-        username: ${{ secrets.DOCKER_HUB_USERNAME }}
->>>>>>> 78a7426871e4fc071cc53d47ba2469a5a01c9146
         password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
     - name: Build and push Docker image
       run: |
-        docker build -t <TU_USUARIO_DOCKER_HUB>/hello-world:latest .
-        docker push <TU_USUARIO_DOCKER_HUB>/hello-world:latest
+        docker build -t liyo13/build-push-actions:latest .
+        docker push liyo13/build-push-actions:latest
 
     - name: Install kubectl
       uses: azure/setup-kubectl@v3
