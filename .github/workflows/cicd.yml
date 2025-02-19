@@ -1,0 +1,37 @@
+name: CI/CD Pipeline
+
+on:
+  #push:
+    branches:
+      - master  # Cambia a la rama que estés utilizando
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to Docker Hub #cambiar despues
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t <TU_USUARIO_DOCKER_HUB>/hello-world:latest .
+        docker push <TU_USUARIO_DOCKER_HUB>/hello-world:latest
+
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v3
+
+    - name: Configure kubeconfig
+      run: |
+        echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig.yaml
+        export KUBECONFIG=kubeconfig.yaml
+
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f deployment.yaml
