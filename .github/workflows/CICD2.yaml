@@ -1,0 +1,55 @@
+name: CI/CD Pipeline for k0s
+
+on:
+  push:
+    branches:
+      - main  # Usa 'main' o 'master' según tu repo
+
+env:
+  DOCKER_IMAGE: liyo13/build-push-actions  # Cambia a tu usuario/imagen
+  KUBE_NAMESPACE: default
+  DEPLOYMENT_NAME: html-app  # Nombre de tu deployment en Kubernetes
+  CONTAINER_NAME: nginx      # Nombre del contenedor en el deployment
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Paso 1: Obtener el código
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Paso 2: Login a Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      # Paso 3: Construir y subir la imagen Docker
+      - name: Build and push Docker image
+        run: |
+          docker build -t $DOCKER_IMAGE:${{ github.sha }} .
+          docker tag $DOCKER_IMAGE:${{ github.sha }} $DOCKER_IMAGE:latest
+          docker push $DOCKER_IMAGE:${{ github.sha }}
+          docker push $DOCKER_IMAGE:latest
+
+      # Paso 4: Instalar kubectl
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+
+      # Paso 5: Configurar acceso al cluster k0s
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      # Paso 6: Desplegar en Kubernetes
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl config set-context --current --namespace=$KUBE_NAMESPACE
+          kubectl apply -f deployment.yaml -f service.yaml  # Aplica ambos archivos
+          kubectl set image deployment/$DEPLOYMENT_NAME $CONTAINER_NAME=$DOCKER_IMAGE:${{ github.sha }} --record
+          kubectl rollout status deployment/$DEPLOYMENT_NAME  # Verifica el estado
