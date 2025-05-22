@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hello-world
+  name: html-app  # Cambiado para que coincida con tu workflow
   labels:
-    app: hello-world
+    app: html-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hello-world
+      app: html-app
   template:
     metadata:
       labels:
-        app: hello-world
+        app: html-app
     spec:
       containers:
-      - name: hello-world
-        image: liyo13/build-push-actions  #  imagen Docker
+      - name: nginx  # Coincide con CONTAINER_NAME en el workflow
+        image: liyo13/build-push-actions
         ports:
         - containerPort: 80
 ---
