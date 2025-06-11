@@ -4,9 +4,9 @@ metadata:
   name: html-app-service
 spec:
   selector:
-    app: html-app
+    app: html-app  # ¡Corregido para que coincida con el deployment!
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
-  type: NodePort  # Cambiado de ClusterIP a NodePort
+  type: NodePort
