@@ -25,9 +25,10 @@ jobs:
           echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
           chmod 600 ~/.kube/config
           # Establecer el contexto EXPLÍCITAMENTE
-          kubectl config use-context k0s  # ¡Asegúrate que coincida con tu kubeconfig!
+          #kubectl config use-context k0s  # ¡Asegúrate que coincida con tu kubeconfig!
           # Verificaciones de debug
-          kubectl config current-context
+          #kubectl config current-context
+          kubectl cluster-info
           kubectl get nodes
 
       # Paso 6: Desplegar en Kubernetes (¡CAMBIOS AQUÍ!)
