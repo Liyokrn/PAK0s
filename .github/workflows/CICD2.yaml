@@ -45,7 +45,7 @@ jobs:
           kubectl config view --minify --output 'jsonpath={..namespace}'
           
           # 3. Aplicar los archivos YAML
-          kubectl apply -f deployment.yaml -f service.yaml
+          kubectl apply -f $GITHUB_WORKSPACE/deployment.yaml -f $GITHUB_WORKSPACE/service.yaml
           
           # 4. Actualizar la imagen
           kubectl set image deployment/$DEPLOYMENT_NAME $CONTAINER_NAME=$DOCKER_IMAGE:${{ github.sha }} --record
