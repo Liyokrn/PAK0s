@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: html-app  # Cambiado para que coincida con tu workflow
+  name: html-app
   labels:
     app: html-app
 spec:
@@ -9,13 +9,21 @@ spec:
   selector:
     matchLabels:
       app: html-app
+  # === Configuración de estrategia de actualización (NUEVO) ===
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1  # Máximo de pods no disponibles durante la actualización
+      maxSurge: 1        # Máximo de pods adicionales durante la actualización
   template:
     metadata:
       labels:
         app: html-app
     spec:
+      # === Tiempo de gracia para terminar pods (NUEVO) ===
+      terminationGracePeriodSeconds: 30  # 30 segundos (valor por defecto)
       containers:
-      - name: nginx  # Coincide con CONTAINER_NAME en el workflow
+      - name: nginx
         image: liyo13/build-push-actions
         ports:
         - containerPort: 80
@@ -26,7 +34,7 @@ metadata:
   name: hello-world-service
 spec:
   selector:
-    app: hello-world
+    app: hello-world  # ¡OJO! Debe coincidir con el label del Deployment (app: html-app)
   ports:
     - protocol: TCP
       port: 80
