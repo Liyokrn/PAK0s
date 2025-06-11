@@ -30,7 +30,10 @@ jobs:
           #kubectl config current-context
           kubectl cluster-info
           kubectl get nodes
-
+      - name: verificacion
+        run: |
+          echo "Directorio actual: $(pwd)"
+          ls -la
       # Paso 6: Desplegar en Kubernetes (¡CAMBIOS AQUÍ!)
       - name: Deploy to Kubernetes
         run: |
