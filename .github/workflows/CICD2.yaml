@@ -18,6 +18,14 @@ jobs:
     steps:
       # Paso 1-4: Sin cambios (Checkout, Docker login, Build, kubectl install)
 
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Descarga todo el historial
+
+      # Paso 2: Configurar Docker/login (si lo necesitas)
+      # ... (tus otros pasos actuales) ...
+
       # Paso 5: Configurar kubeconfig (¡CAMBIOS AQUÍ!)
       - name: Configure kubeconfig
         run: |
