@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  DOCKER_IMAGE: liyo13/build-push-actions
+  DOCKER_IMAGE: httpd
   KUBE_NAMESPACE: default
   DEPLOYMENT_NAME: html-app
   CONTAINER_NAME: nginx
