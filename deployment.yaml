@@ -23,7 +23,7 @@ spec:
       # === Tiempo de gracia para terminar pods (NUEVO) ===
       terminationGracePeriodSeconds: 30  # 30 segundos (valor por defecto)
       containers:
-      - name: httpd-alpine
+      - name: nginx
         image: httpd:alpine
         ports:
         - containerPort: 80
