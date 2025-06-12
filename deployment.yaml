@@ -23,8 +23,8 @@ spec:
       # === Tiempo de gracia para terminar pods (NUEVO) ===
       terminationGracePeriodSeconds: 30  # 30 segundos (valor por defecto)
       containers:
-      - name: nginx
-        image: liyo13/build-push-actions
+      - name: httpdAlpine
+        image: httpd:alpine
         ports:
         - containerPort: 80
 ---
