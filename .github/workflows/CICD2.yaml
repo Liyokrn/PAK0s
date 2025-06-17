@@ -3,30 +3,32 @@ name: CI/CD Pipeline for k0s with httpd-alpine
 on:
   push:
     branches:
-      - QA
-
-env:
-  # Construye el nombre de la imagen usando el registro de GHCR y el nombre de tu repositorio
-  IMAGE_NAME: ghcr.io/${{ github.repository }} 
-  KUBE_NAMESPACE: default
-  DEPLOYMENT_NAME: html-app
-  # ✅ El nombre del contenedor debe coincidir con el de deployment.yaml
-  CONTAINER_NAME: httpd-container 
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    # Definimos las variables estáticas aquí
+    env:
+      KUBE_NAMESPACE: default
+      DEPLOYMENT_NAME: html-app
+      CONTAINER_NAME: httpd-container
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # -- Iniciar sesión en GitHub Container Registry usando tus secrets --
+      # -- PASO NUEVO: Convertir el nombre del repositorio a minúsculas --
+      # Este paso crea la variable de entorno IMAGE_NAME para los siguientes pasos.
+      - name: Set lowercase image name
+        run: echo "IMAGE_NAME=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      # -- Iniciar sesión en GitHub Container Registry --
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          # ✅ Usando tus secrets personalizados
           username: ${{ secrets.USERGH }}
           password: ${{ secrets.GHCR_TOKEN }}
 
@@ -36,7 +38,7 @@ jobs:
         with:
           context: .
           push: true
-          # Etiqueta la imagen con el hash del commit para una versión única
+          # ✅ Se usa la nueva variable de entorno IMAGE_NAME que ya está en minúsculas
           tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
           labels: |
             org.opencontainers.image.source=${{ github.repositoryUrl }}
@@ -54,14 +56,11 @@ jobs:
       # -- Desplegar en Kubernetes --
       - name: Deploy to Kubernetes
         run: |
-          # 1. Aplicar los manifiestos de Kubernetes
           kubectl apply -f deployment.yaml -f service.yaml
           
-          # 2. Actualizar la imagen del Deployment con la que acabamos de subir
-          # ✅ Usando el CONTAINER_NAME correcto
+          # ✅ Se usa la nueva variable de entorno IMAGE_NAME aquí también
           kubectl set image deployment/$DEPLOYMENT_NAME $CONTAINER_NAME=${{ env.IMAGE_NAME }}:${{ github.sha }} --record
           
-          # 3. Verificar el despliegue
           echo "Waiting for deployment rollout to finish..."
           kubectl rollout status deployment/$DEPLOYMENT_NAME
           echo "Deployment successful! Pods list:"
