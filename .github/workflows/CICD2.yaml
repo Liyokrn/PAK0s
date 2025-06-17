@@ -3,7 +3,7 @@ name: CI/CD Pipeline for k0s with httpd-alpine
 on:
   push:
     branches:
-      - main
+      - QA
 
 jobs:
   build-and-deploy:
