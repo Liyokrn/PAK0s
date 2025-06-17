@@ -14,7 +14,7 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 1  # Máximo de pods no disponibles durante la actualización
-      maxSurge: 1        # Máximo de pods adicionales durante la actualización
+      maxSurge: 5        # Máximo de pods adicionales durante la actualización
   template:
     metadata:
       labels:
