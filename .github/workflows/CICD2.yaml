@@ -1,66 +1,68 @@
-name: CI/CD Pipeline for k0s
+name: CI/CD Pipeline for k0s with httpd-alpine
 
 on:
   push:
     branches:
-      - main
+      - QA
 
 env:
-  DOCKER_IMAGE: httpd
+  # Construye el nombre de la imagen usando el registro de GHCR y el nombre de tu repositorio
+  IMAGE_NAME: ghcr.io/${{ github.repository }} 
   KUBE_NAMESPACE: default
   DEPLOYMENT_NAME: html-app
-  CONTAINER_NAME: nginx
+  # ✅ El nombre del contenedor debe coincidir con el de deployment.yaml
+  CONTAINER_NAME: httpd-container 
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Paso 1-4: Sin cambios (Checkout, Docker login, Build, kubectl install)
-
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      # -- Iniciar sesión en GitHub Container Registry usando tus secrets --
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          fetch-depth: 0  # Descarga todo el historial
+          registry: ghcr.io
+          # ✅ Usando tus secrets personalizados
+          username: ${{ secrets.USERGH }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
-      # Paso 2: Configurar Docker/login (si lo necesitas)
-      # ... (tus otros pasos actuales) ...
+      # -- Construir y subir la imagen Docker --
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          # Etiqueta la imagen con el hash del commit para una versión única
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.revision=${{ github.sha }}
 
-      # Paso 5: Configurar kubeconfig (¡CAMBIOS AQUÍ!)
+      # -- Configuración de Kubectl (sin cambios) --
       - name: Configure kubeconfig
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
           chmod 600 ~/.kube/config
-          # Establecer el contexto EXPLÍCITAMENTE
-          #kubectl config use-context k0s  # ¡Asegúrate que coincida con tu kubeconfig!
-          # Verificaciones de debug
-          #kubectl config current-context
           kubectl cluster-info
           kubectl get nodes
-      - name: verificacion
-        run: |
-          echo "Directorio actual: $(pwd)"
-          ls -la
-      # Paso 6: Desplegar en Kubernetes (¡CAMBIOS AQUÍ!)
+
+      # -- Desplegar en Kubernetes --
       - name: Deploy to Kubernetes
         run: |
-          # 1. Establecer contexto y namespace
-          kubectl config use-context k0s  # ¡Repetir por seguridad!
-          kubectl config set-context --current --namespace=$KUBE_NAMESPACE
+          # 1. Aplicar los manifiestos de Kubernetes
+          kubectl apply -f deployment.yaml -f service.yaml
           
-          # 2. Debug: Verificar contexto y namespace
-          echo "Contexto actual:"
-          kubectl config current-context
-          echo "Namespace actual:"
-          kubectl config view --minify --output 'jsonpath={..namespace}'
+          # 2. Actualizar la imagen del Deployment con la que acabamos de subir
+          # ✅ Usando el CONTAINER_NAME correcto
+          kubectl set image deployment/$DEPLOYMENT_NAME $CONTAINER_NAME=${{ env.IMAGE_NAME }}:${{ github.sha }} --record
           
-          # 3. Aplicar los archivos YAML
-          kubectl apply -f $GITHUB_WORKSPACE/deployment.yaml -f $GITHUB_WORKSPACE/service.yaml
-          
-          # 4. Actualizar la imagen
-          kubectl set image deployment/$DEPLOYMENT_NAME $CONTAINER_NAME=$DOCKER_IMAGE:alpine --record
-          
-          # 5. Verificar el despliegue
+          # 3. Verificar el despliegue
+          echo "Waiting for deployment rollout to finish..."
           kubectl rollout status deployment/$DEPLOYMENT_NAME
-          kubectl get pods -n $KUBE_NAMESPACE  # Debug adicional
+          echo "Deployment successful! Pods list:"
+          kubectl get pods -n $KUBE_NAMESPACE
