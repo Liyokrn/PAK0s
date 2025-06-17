@@ -6,6 +6,7 @@ RUN a2enmod rewrite headers remoteip
 
 # Copiar archivos PHP al directorio web
 COPY index.php /var/www/html/
+COPY index1.html /var/www/html/
 COPY apache-k8s.conf /etc/apache2/conf-available/kubernetes.conf
 
 # Habilitar configuración de Kubernetes
