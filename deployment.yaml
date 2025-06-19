@@ -2,14 +2,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: html-app
+  name: html-appQA
   labels:
-    app: html-app
+    app: html-appQA
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: html-app
+      app: html-appQA
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -18,7 +18,7 @@ spec:
   template:
     metadata:
       labels:
-        app: html-app
+        app: html-appQA
     spec:
       # === PASO NUEVO: AÑADIR EL SECRETO PARA DESCARGAR IMÁGENES ===
       imagePullSecrets:
@@ -26,7 +26,7 @@ spec:
       # ==========================================================
       terminationGracePeriodSeconds: 30
       containers:
-      - name: httpd-container
+      - name: httpd-containerQA
         image: httpd:alpine # Esta imagen será reemplazada por el pipeline
         ports:
         - containerPort: 80
