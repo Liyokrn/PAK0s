@@ -13,7 +13,7 @@ jobs:
     env:
       KUBE_NAMESPACE: default
       DEPLOYMENT_NAME: html-appQA
-      CONTAINER_NAME: httpd-container
+      CONTAINER_NAME: httpd-containerQA
 
     steps:
       - name: Checkout repository
