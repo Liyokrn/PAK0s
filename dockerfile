@@ -1,9 +1,18 @@
 # Dockerfile para Kubernetes
-# Dockerfile optimizado para httpd:alpine
-FROM httpd:alpine
+FROM php:8.2-apache
 
-# Copiar todo el contenido del repositorio (HTML, etc.) al directorio web de Apache
-COPY . /usr/local/apache2/htdocs/
+# Habilitar módulos de Apache necesarios para Kubernetes
+RUN a2enmod rewrite headers remoteip
 
-# El puerto 80 ya está expuesto por la imagen base, pero es buena práctica declararlo.
+# Copiar archivos PHP al directorio web
+COPY index.php /var/www/html/
+COPY apache-k8s.conf /etc/apache2/conf-available/kubernetes.conf
+
+# Habilitar configuración de Kubernetes
+RUN a2enconf kubernetes
+
+# Configurar permisos
+RUN chown -R www-data:www-data /var/www/html
+
+# Exponer puerto 80
 EXPOSE 80
