@@ -12,7 +12,7 @@ jobs:
     # Definimos las variables estáticas aquí
     env:
       KUBE_NAMESPACE: default
-      DEPLOYMENT_NAME: html-app
+      DEPLOYMENT_NAME: html-appQA
       CONTAINER_NAME: httpd-container
 
     steps:
