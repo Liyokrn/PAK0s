@@ -1,3 +1,4 @@
+# deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -9,34 +10,23 @@ spec:
   selector:
     matchLabels:
       app: html-app
-  # === Configuración de estrategia de actualización (NUEVO) ===
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 1  # Máximo de pods no disponibles durante la actualización
-      maxSurge: 5        # Máximo de pods adicionales durante la actualización
+      maxUnavailable: 1
+      maxSurge: 1
   template:
     metadata:
       labels:
         app: html-app
     spec:
-      # === Tiempo de gracia para terminar pods (NUEVO) ===
-      terminationGracePeriodSeconds: 30  # 30 segundos (valor por defecto)
+      # === PASO NUEVO: AÑADIR EL SECRETO PARA DESCARGAR IMÁGENES ===
+      imagePullSecrets:
+      - name: ghcr-credentials  # <-- El nombre del secreto que creaste
+      # ==========================================================
+      terminationGracePeriodSeconds: 30
       containers:
-      - name: nginx
-        image: httpd:alpine
+      - name: httpd-container
+        image: httpd:alpine # Esta imagen será reemplazada por el pipeline
         ports:
         - containerPort: 80
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: hello-world-service
-spec:
-  selector:
-    app: hello-world  # ¡OJO! Debe coincidir con el label del Deployment (app: html-app)
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 80
-  type: ClusterIP
