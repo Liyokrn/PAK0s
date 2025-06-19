@@ -20,11 +20,13 @@ spec:
       labels:
         app: html-app
     spec:
+      # === PASO NUEVO: AÑADIR EL SECRETO PARA DESCARGAR IMÁGENES ===
+      imagePullSecrets:
+      - name: ghcr-credentials  # <-- El nombre del secreto que creaste
+      # ==========================================================
       terminationGracePeriodSeconds: 30
       containers:
-      # Nombre del contenedor actualizado para mayor claridad
-      - name: httpd-container 
-        # Esta imagen es solo un placeholder, el pipeline la reemplazará
-        image: httpd:alpine 
+      - name: httpd-container
+        image: httpd:alpine # Esta imagen será reemplazada por el pipeline
         ports:
         - containerPort: 80
