@@ -4,7 +4,7 @@ metadata:
   name: html-app-service
 spec:
   selector:
-    app: html-app  # ¡Corregido para que coincida con el deployment!
+    app: html-appQA  # ¡Corregido para que coincida con el deployment!
   ports:
     - protocol: TCP
       port: 80
