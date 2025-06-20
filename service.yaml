@@ -2,11 +2,19 @@ apiVersion: v1
 kind: Service
 metadata:
   name: html-app-service
+  annotations:
+    # Anotaciones clave para preservar IPs (elige según tu entorno):
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"  # Para Nginx Ingress
+    # Solo para clouds (elige según tu proveedor):
+    # service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"  # AWS
+    # service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol: "true"  # DigitalOcean
 spec:
+  type: NodePort  # O LoadBalancer si estás en cloud
+  externalTrafficPolicy: Local  # ¡Crítico! Preserva IPs de origen
   selector:
-    app: html-app  # ¡Corregido para que coincida con el deployment!
+    app: html-app  # Debe coincidir con las labels de tus pods
   ports:
-    - protocol: TCP
+    - name: http
       port: 80
       targetPort: 80
-  type: NodePort
+      # nodePort: 30080  # Opcional: Fija un puerto (30000-32767)
