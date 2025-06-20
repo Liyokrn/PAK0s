@@ -1,0 +1,36 @@
+# ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: main-ingress
+  annotations:
+    # Esta es la anotación que querías implementar. Le dice a NGINX que confíe
+    # en las cabeceras X-Forwarded-*. Es útil si tienes otro proxy delante.
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+spec:
+  # Esta clase le dice a Kubernetes que este Ingress debe ser manejado
+  # por el Ingress Controller de NGINX que instalamos.
+  ingressClassName: nginx
+  rules:
+  - host: "kubek0s.com" # Tráfico para el dominio de producción
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            # Apunta al Service de producción
+            name: html-app-service
+            port:
+              number: 80
+  - host: "qa.kubek0s.com" # Tráfico para el dominio de QA
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            # Apunta al Service de QA
+            name: html-app-service-QA
+            port:
+              number: 80
