@@ -49,7 +49,7 @@ jobs:
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
-          chmod 600 ~/.kube/config
+          chmod 600 ~/.kube/config  # Permisos correctos
           kubectl cluster-info
           kubectl get nodes
 
